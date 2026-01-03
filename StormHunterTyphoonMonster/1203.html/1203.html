@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>風暴獵人:決戰颱風怪獸</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&family=Nunito:wght@400;700;800&family=Poppins:wght@700;800&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+<style>
+/* 1. 配色與字體變數 */
+:root {
+--primary: #FFA56A;
+--soft-yellow: #FFE8A3;
+--sky-blue: #A8D8F8;
+--light-purple: #D7CCFF;
+--bg-cream: #FFFDF9;
+--accent-btn: #FF875E;
+--text-dark: #334155;
+--section-padding: 6rem 0;
+--card-radius: 2rem;
+--btn-radius: 2rem;
+}
+
+body {
+font-family: 'Nunito', 'Noto Sans TC', sans-serif;
+color: var(--text-dark);
+background-color: var(--bg-cream);
+line-height: 1.8;
+overflow-x: hidden;
+}
+
+h1, h2, h3, h4, h5, h6, .navbar-brand-text {
+font-family: 'Noto Sans TC', sans-serif;
+font-weight: 900;
+color: var(--text-dark);
+}
+
+/* 🟢 關鍵樣式：直式側邊注音 (Vertical Bopomofo on the Right) */
+
+ruby {
+display: inline-flex;
+align-items: center; /* 讓國字與注音整體垂直對齊 */
+vertical-align: middle;
+margin: 0 0.2em; /* 字與字之間的間距 */
+line-height: 1.2;
+}
+
+/* 國字本體 */
+ruby > span {
+display: block;
+}
+
+/* rt (注音容器)
+修改重點：改用 Flexbox 橫向排列 (左邊是符號堆疊，右邊是聲調)
+這樣可以用 align-items: center 讓聲調強制置中
+*/
+rt {
+display: inline-flex !important;
+flex-direction: row; /* 左符號、右聲調 */
+align-items: center; /* 垂直置中 -> 聲調就會在中間！ */
+font-size: 0.35em; /* 注音大小調整 */
+line-height: 1;
+margin-left: 0.3em; /* 國字與注音的距離 */
+color: inherit;
+font-family: "Bopomofo", "Noto Sans TC", sans-serif;
+font-weight: 500;
+height: 100%;
+}
+
+/* JS 生成的：注音符號堆疊 (ㄅㄆㄇ) */
+.zhuyin-symbols {
+display: flex;
+flex-direction: column; /* 垂直堆疊 */
+justify-content: center;
+align-items: center;
+line-height: 1.1; /* 符號之間的緊密度 */
+}
+
+/* JS 生成的：聲調符號 (ˊˇˋ) */
+.zhuyin-tone {
+display: block;
+margin-left: 0.15em; /* 聲調與符號的水平距離 */
+font-size: 1.0em; /* 聲調稍微大一點比較清楚 */
+transform: translateY(-5%); /* 微調：視覺上稍微往上一點點更平衡 */
+}
+
+/* 特例：輕聲 (˙) 必須在最上方 */
+rt.has-light-tone {
+flex-direction: column; /* 輕聲時改為垂直排列 */
+justify-content: flex-start;
+align-items: center;
+}
+
+.zhuyin-tone-light {
+display: block;
+width: 100%;
+text-align: center;
+font-size: 1.5em;
+margin-bottom: -0.2em; /* 讓輕聲貼近下面的符號 */
+margin-left: 0;
+}
+
+/* 2. 通用 UI 元素樣式 */
+.btn-magic {
+background-color: var(--accent-btn);
+border: none;
+color: white;
+padding: 0.75rem 2rem;
+border-radius: var(--btn-radius);
+font-weight: 700;
+transition: all 0.3s ease;
+box-shadow: 0 8px 15px rgba(255, 135, 94, 0.3);
+text-decoration: none;
+display: inline-flex;
+align-items: center;
+}
+
+.btn-magic:hover {
+background-color: #FF7549;
+box-shadow: 0 10px 20px rgba(255, 135, 94, 0.5);
+transform: translateY(-2px);
+color: white;
+}
+
+/* 修正卡片樣式 */
+.program-card {
+border-radius: 3rem;
+padding: 2rem;
+text-align: center;
+color: white;
+transition: transform 0.3s ease;
+box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+display: flex;
+flex-direction: column;
+justify-content: space-between;
+height: 100%;
+}
+
+/* 讓卡片內的文字強制變白 */
+.program-card h3, .program-card p, .program-card rt, .program-card ruby {
+color: white !important;
+}
+
+/* 按鈕樣式修正 */
+.program-card .btn {
+background-color: white !important;
+color: #334155 !important;
+border: none;
+border-radius: 50rem;
+padding: 0.5rem 2rem;
+font-weight: 700;
+width: fit-content;
+margin: 0 auto;
+}
+.program-card .btn ruby, .program-card .btn rt {
+color: #334155 !important;
+}
+
+.program-card:hover {
+transform: scale(1.03);
+box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+}
+
+.program-card h3 {
+font-size: 1.75rem;
+margin-top: 0.5rem;
+margin-bottom: 1rem;
+display: flex;
+justify-content: center;
+flex-wrap: wrap;
+}
+
+.program-card-img {
+width: 100%;
+height: 200px;
+object-fit: cover;
+border-radius: 2rem;
+margin-bottom: 1rem;
+background-color: #fff;
+}
+
+/* 繪本裝飾 */
+.cloud-divider {
+fill: currentColor;
+width: 100%;
+display: block;
+margin-bottom: -1px;
+}
+.blob-shape {
+clip-path: url(#blobClip);
+width: 100%;
+height: auto;
+}
+.decoration-star {
+position: absolute;
+width: 30px;
+height: 30px;
+color: var(--soft-yellow);
+filter: drop-shadow(0 0 5px rgba(0,0,0,0.1));
+z-index: 1;
+}
+.decoration-pencil {
+position: absolute;
+width: 40px;
+height: 40px;
+color: var(--sky-blue);
+transform: rotate(-30deg);
+z-index: 1;
+}
+
+/* Navbar */
+.navbar-custom {
+background-color: var(--bg-cream);
+padding: 1rem 0;
+box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+.navbar-brand-text {
+font-size: 1.5rem;
+display: flex;
+align-items: center;
+}
+.nav-link {
+font-weight: 700;
+color: var(--text-dark) !important;
+margin: 0 0.5rem;
+display: flex;
+align-items: center;
+}
+.nav-link:hover { color: var(--accent-btn) !important; }
+
+@media (min-width: 992px) {
+.navbar-collapse { flex-grow: 0; }
+.navbar-nav { margin-right: auto; }
+.navbar-toggler { display: none; }
+}
+@media (max-width: 991.98px) {
+.navbar-nav { padding: 1rem 0; text-align: center; align-items: center; }
+}
+
+/* Hero */
+#hero {
+padding: 8rem 0;
+background-color: var(--soft-yellow);
+position: relative;
+overflow: hidden;
+border-bottom-left-radius: 80% 20%;
+border-bottom-right-radius: 80% 20%;
+}
+.hero-title {
+font-size: 2.3rem;
+line-height: 1.5;
+margin-bottom: 1rem;
+display: flex;
+flex-wrap: wrap;
+justify-content: center;
+gap: 0.3rem;
+}
+@media (min-width: 992px) { .hero-title { justify-content: flex-start; } }
+
+.hero-subtitle {
+font-size: 1.25rem;
+margin-bottom: 2rem;
+display: flex;
+flex-wrap: wrap;
+justify-content: center;
+}
+@media (min-width: 992px) { .hero-subtitle { justify-content: flex-start; } }
+
+.hero-image-container { position: relative; padding: 2rem; }
+.hero-image { width: 100%; border-radius: var(--card-radius); box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2); }
+
+/* Footer */
+footer {
+            background: var(--light-purple);
+            color: rgb(255, 255, 255);
+            text-align: center;
+            padding: 40px 0;
+            border-radius: 40px 40px 0 0;
+            position: relative;
+        }
+        footer p, footer h5, footer a, footer rt, footer ruby { color: white !important; }
+        footer .social-icon { color: white; margin: 0 10px; font-size: 1.2rem; }
+
+</style>
+</head>
+
+<body>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+// 1. 處理 Bootstrap Navbar 收合
+const navLinks = document.querySelectorAll('.nav-link');
+const navbarCollapse = document.getElementById('navbarNav');
+navLinks.forEach(link => {
+link.addEventListener('click', () => {
+const bsCollapse = bootstrap.Collapse.getInstance(navbarCollapse);
+if (bsCollapse) bsCollapse.hide();
+});
+});
+
+// 2. 處理注音排版 (Zhuyin Layout Formatter)
+const rtElements = document.querySelectorAll('rt');
+
+rtElements.forEach(rt => {
+const text = rt.innerText.trim();
+if (!text) return;
+
+// 判斷最後一個字元是否為聲調
+const lastChar = text.slice(-1);
+const isTone = ['ˊ', 'ˇ', 'ˋ', '˙'].includes(lastChar);
+
+if (isTone) {
+const symbols = text.slice(0, -1); // 取得 ㄅㄆㄇ
+const tone = lastChar; // 取得 聲調
+
+if (tone === '˙') {
+// 如果是輕聲，加上 class 讓 CSS 處理成垂直排列 (輕聲在上)
+rt.classList.add('has-light-tone');
+rt.innerHTML = `
+<span class="zhuyin-tone-light">${tone}</span>
+<div class="zhuyin-symbols">
+${Array.from(symbols).map(s => `<span>${s}</span>`).join('')}
+</div>
+`;
+} else {
+// 如果是 二三四聲，放在中間 (利用 Flexbox row + align-items: center)
+rt.innerHTML = `
+<div class="zhuyin-symbols">
+${Array.from(symbols).map(s => `<span>${s}</span>`).join('')}
+</div>
+<span class="zhuyin-tone">${tone}</span>
+`;
+}
+} else {
+// 如果沒有聲調 (一聲)
+rt.innerHTML = `
+<div class="zhuyin-symbols">
+${Array.from(text).map(s => `<span>${s}</span>`).join('')}
+</div>
+`;
+}
+});
+});
+
+</script>
+<!-- SVG Definitions for Blob and Dividers -->
+    <svg width="0" height="0" style="position: absolute; display: none;">
+        <defs>
+            <clipPath id="blobClip">
+                <path d="M49.9,-27.6C60,-12.3,60.8,8.2,53.2,27.1C45.6,46,29.7,63.4,12.2,64.2C-5.3,65,-23.4,49.2,-37.9,32.3C-52.4,15.4,-63.3,-2.6,-59.4,-18.2C-55.5,-33.7,-36.8,-46.8,-19.7,-49C-2.6,-51.2,14.5,-42.6,30.3,-35.1C46,-27.6,58.7,-20.5,49.9,-27.6Z" transform="scale(0.8) translate(50 50)"></path>
+            </clipPath>
+        </defs>
+    </svg>
+    
+    <!-- 雲朵分隔線 SVG -->
+    <svg id="cloudDividerTop" style="transform: rotate(180deg);" class="cloud-divider" viewBox="0 0 1440 100" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg" fill="var(--bg-cream)">
+        <path d="M1440,56.98C1277.58,16.59,1035.79,-13.78,800,26.79C564.21,67.36,322.42,56.98,160,56.98L0,56.98L0,100L1440,100L1440,56.98Z" />
+    </svg>
+    
+    <!-- 1. Header & Navigation -->
+    <header>
+        <nav class="navbar navbar-expand-lg navbar-custom sticky-top">
+            <div class="container-xl px-4 px-xl-0">
+                <!-- 菜單 (左側 for Desktop) -->
+                <div class="collapse navbar-collapse order-lg-1" id="navbarNav">
+                    <ul class="navbar-nav me-auto">
+                        <li class="nav-item"><a class="nav-link" href="#hero"><ruby>主<rt>ㄓㄨˇ</rt></ruby><ruby>頁<rt>ㄧㄝˋ</rt></ruby></a></li>
+                        <li class="nav-item"><a class="nav-link" href="#products"><ruby>課<rt>ㄎㄜˋ</rt></ruby><ruby>程<rt>ㄔㄥˊ</rt></ruby><ruby>介<rt>ㄐㄧㄝˋ</rt></ruby><ruby>紹<rt>ㄕㄠˋ</rt></ruby></a></li>
+                        <li class="nav-item"><a class="nav-link" href="#contact"><ruby>聯<rt>ㄌㄧㄢˊ</rt></ruby><ruby>繫<rt>ㄒㄧˋ</rt></ruby><ruby>我<rt>ㄨㄛˇ</rt></ruby><ruby>們<rt>ㄇㄣ˙</rt></ruby></a></li>
+                    </ul>
+                </div>
+
+                <!-- Logo & Hamburger (右側 for Desktop, 左/右混合 for Mobile) -->
+                <a class="navbar-brand d-flex align-items-center order-lg-2" href="#hero">
+                    <!-- 葡萄圖示 SVG -->
+                    <svg width="30" height="30" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-right: 0.5rem;">
+                        <path d="M12 2C8 2 7 6 7 6C7 6 6 8 8 10C8 10 9 12 7 14C7 14 5 16 7 18C7 18 9 20 12 20C15 20 17 18 17 18C17 18 15 16 17 14C17 14 18 12 16 10C16 10 17 8 16 6C16 6 15 2 12 2Z" fill="var(--primary)"/>
+                        <circle cx="12" cy="10" r="2" fill="var(--accent-btn)"/>
+                        <circle cx="10" cy="14" r="2" fill="var(--accent-btn)"/>
+                        <circle cx="14" cy="14" r="2" fill="var(--accent-btn)"/>
+                        <path d="M12 2L13 1.5C13 1.5 14 3 15 4L13 4V2Z" fill="#6B8E23"/>
+                    </svg>
+                    <span class="navbar-brand-text"><ruby>風<rt>ㄈㄥ</rt></ruby><ruby>爆<rt>ㄅㄠˋ</rt></ruby><ruby>獵<rt>ㄌㄧㄝˋ</rt></ruby><ruby>人<rt>ㄖㄣˊ</rt></ruby></span>
+                </a>
+                
+                <!-- 漢堡選單按鈕 (手機版) -->
+                <button class="navbar-toggler order-lg-3" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+            </div>
+        </nav>
+    </header>
+
+<svg width="0" height="0" style="position: absolute; display: none;">
+<defs>
+<clipPath id="blobClip">
+<path d="M49.9,-27.6C60,-12.3,60.8,8.2,53.2,27.1C45.6,46,29.7,63.4,12.2,64.2C-5.3,65,-23.4,49.2,-37.9,32.3C-52.4,15.4,-63.3,-2.6,-59.4,-18.2C-55.5,-33.7,-36.8,-46.8,-19.7,-49C-2.6,-51.2,14.5,-42.6,30.3,-35.1C46,-27.6,58.7,-20.5,49.9,-27.6Z" transform="scale(0.8) translate(50 50)"></path>
+</clipPath>
+</defs>
+</svg>
+
+<section id="hero" class="position-relative text-center text-lg-start">
+<div class="container-xl">
+<div class="row align-items-center g-5">
+<div class="col-lg-6 z-1">
+<h1 class="hero-title fw-bold">
+<ruby>決<rt>ㄐㄩㄝˊ</rt></ruby> <ruby>戰<rt>ㄓㄢˋ</rt></ruby> <ruby>颱<rt>ㄊㄞˊ</rt></ruby><ruby>風<rt>ㄈㄥ</rt></ruby>
+<ruby>怪<rt>ㄍㄨㄞˋ</rt></ruby><ruby>獸<rt>ㄕㄡˋ</rt></ruby><ruby>—</ruby> &nbsp;
+<ruby>沉<rt>ㄔㄣˊ</rt></ruby><ruby>浸<rt>ㄐㄧㄣˋ</rt></ruby><ruby>颱<rt>ㄊㄞˊ</rt></ruby><ruby>風<rt>ㄈㄥ</rt></ruby><ruby>實<rt>ㄕˊ</rt></ruby><ruby>驗<rt>ㄧㄢˋ</rt></ruby><ruby>箱<rt>ㄒㄧㄤ</rt></ruby></h1>
+</h1>
+<br>
+<p class="hero-subtitle text-muted-dark mb-4">
+<ruby>學<rt>ㄒㄩㄝˊ</rt></ruby><ruby>習<rt>ㄒㄧˊ</rt></ruby><ruby>如<rt>ㄖㄨˊ</rt></ruby><ruby>何<rt>ㄏㄜˊ</rt></ruby><ruby>面<rt>ㄇㄧㄢˋ</rt></ruby><ruby>對<rt>ㄉㄨㄟˋ</rt></ruby><ruby>颱<rt>ㄊㄞˊ</rt></ruby><ruby>風<rt>ㄈㄥ</rt></ruby>、<ruby>保<rt>ㄅㄠˇ</rt></ruby><ruby>護<rt>ㄏㄨˋ</rt></ruby><ruby>自<rt>ㄗˋ</rt></ruby><ruby>己<rt>ㄐㄧˇ</rt></ruby>。
+</p>
+<a href="#products" class="btn btn-magic btn-lg"><ruby>開<rt>ㄎㄞ</rt></ruby><ruby>始<rt>ㄕˇ</rt></ruby> <i class="fas fa-arrow-right ms-2"></i></a>
+
+<i class="decoration-star fas fa-star" style="top: 10px; left: 45%;"></i>
+<i class="decoration-pencil fas fa-pen" style="bottom: 20px; right: 20px;"></i>
+</div>
+<div class="col-lg-6 hero-image-container z-1">
+<div class="bg-primary rounded-circle position-absolute top-0 start-0 w-75 h-75 opacity-25"></div>
+<img src="./Gemini_Generated_Image_gc3qcagc3qcagc3q.png" alt="Child learning safety" class="hero-image blob-shape">
+</div>
+</div>
+</div>
+</section>
+
+<section id="products" class="py-5" style="background-color: #F8F4E8;">
+<div class="container-xl pt-5">
+<h2 class="section-title text-center mb-5"> <ruby>課<rt>ㄎㄜˋ</rt></ruby><ruby>程<rt>ㄔㄥˊ</rt></ruby><ruby>介<rt>ㄐㄧㄝˋ</rt></ruby><ruby>紹<rt>ㄕㄠˋ</rt></ruby> </h2>
+<div class="row g-4 justify-content-center">
+
+<div class="col-md-6 col-lg-4">
+<div class="program-card" style="background-color: var(--primary);">
+<img src="./1766950096919.png" alt="Typhoon Class" class="program-card-img">
+<h3><ruby>颱<rt>ㄊㄞˊ</rt></ruby><ruby>風<rt>ㄈㄥ</rt></ruby><ruby>百<rt>ㄅㄞˇ</rt></ruby><ruby>科<rt>ㄎㄜ</rt></ruby><ruby>教<rt>ㄐㄧㄠˋ</rt></ruby><ruby>室<rt>ㄕˋ</rt></ruby></h3>
+<a href="1205.html" class="btn"><ruby>開<rt>ㄎㄞ</rt></ruby><ruby>始<rt>ㄕˇ</rt></ruby></a>
+</div>
+</div>
+
+<div class="col-md-6 col-lg-4">
+<div class="program-card" style="background-color: var(--sky-blue);">
+<img src="./1766950096919(3).png" alt="Game Class" class="program-card-img">
+<h3><ruby>決<rt>ㄐㄩㄝˊ</rt></ruby><ruby>戰<rt>ㄓㄢˋ</rt></ruby><ruby>颱<rt>ㄊㄞˊ</rt></ruby><ruby>風<rt>ㄈㄥ</rt></ruby><ruby>怪<rt>ㄍㄨㄞˋ</rt></ruby><ruby>獸<rt>ㄕㄡˋ</rt></ruby></h3>
+<a href="1204.html" class="btn"><ruby>開<rt>ㄎㄞ</rt></ruby><ruby>始<rt>ㄕˇ</rt></ruby></a>
+</div>
+</div>
+
+<div class="col-md-6 col-lg-4">
+<div class="program-card" style="background-color: var(--light-purple);">
+<img src="./Gemini_Generated_Image_gc3qcagc3qcagc3q.png" alt="DIY Class" class="program-card-img">
+<h3><ruby>颱<rt>ㄊㄞˊ</rt></ruby><ruby>風<rt>ㄈㄥ</rt></ruby><ruby>實<rt>ㄕˊ</rt></ruby><ruby>驗<rt>ㄧㄢˋ</rt></ruby><ruby>箱</ruby><rt>ㄒㄧㄤ</rt></h3>
+<a href="1206.html" class="btn"><ruby>開<rt>ㄎㄞ</rt></ruby><ruby>始<rt>ㄕˇ</rt></ruby></a>
+</div>
+</div>
+</div>
+</div>
+</section>
+
+
+
+<footer id="contact">
+<div class="container-xl">
+<div class="row">
+<div class="col-lg-4 text-center text-lg-start mb-4">
+<a class="navbar-brand d-flex align-items-center justify-content-center justify-content-lg-start" href="#">
+<svg width="40" height="40" viewBox="0 0 24 24" fill="none" style="margin-right: 0.5rem;">
+<path d="M12 2C8 2 7 6 7 6C7 6 6 8 8 10C8 10 9 12 7 14C7 14 5 16 7 18C7 18 9 20 12 20C15 20 17 18 17 18C17 18 15 16 17 14C17 14 18 12 16 10C16 10 17 8 16 6C16 6 15 2 12 2Z" fill="white"/>
+<circle cx="12" cy="10" r="2" fill="var(--accent-btn)"/>
+<circle cx="10" cy="14" r="2" fill="var(--accent-btn)"/>
+<circle cx="14" cy="14" r="2" fill="var(--accent-btn)"/>
+<path d="M12 2L13 1.5C13 1.5 14 3 15 4L13 4V2Z" fill="#8FBC8F"/>
+</svg>
+<span class="navbar-brand-text text-white"><ruby>幼<rt>ㄧㄡˋ</rt></ruby><ruby>兒<rt>ㄦˊ</rt></ruby><ruby>防<rt>ㄈㄤˊ</rt></ruby><ruby>災<rt>ㄗㄞ</rt></ruby><ruby>小<rt>ㄒㄧㄠˇ</rt></ruby><ruby>學<rt>ㄒㄩㄝˊ</rt></ruby><ruby>堂<rt>ㄊㄤˊ</rt></ruby></span>
+</a>
+</div>
+
+<div class="col-lg-4 mb-4 text-center">
+<h5 class="fw-bold mb-3"><ruby>聯<rt>ㄌㄧㄢˊ</rt></ruby><ruby>絡<rt>ㄌㄨㄛˋ</rt></ruby><ruby>資<rt>ㄗ</rt></ruby><ruby>訊<rt>ㄒㄩㄣˋ</rt></ruby></h5>
+<p class="mb-1"><i class="fas fa-map-marker-alt me-2"></i> <ruby>幼<rt>ㄧㄡˋ</rt></ruby><ruby>兒<rt>ㄦˊ</rt></ruby><ruby>防<rt>ㄈㄤˊ</rt></ruby><ruby>災<rt>ㄗㄞ</rt></ruby><ruby>小<rt>ㄒㄧㄠˇ</rt></ruby><ruby>學<rt>ㄒㄩㄝˊ</rt></ruby><ruby>堂<rt>ㄊㄤˊ</rt></ruby></p>
+<p class="mb-1"><i class="fas fa-phone me-2"></i> (02) 1234-5678</p>
+<p class="mb-1"><i class="fas fa-envelope me-2"></i> service@sweetmagic.com</p>
+</div>
+
+<div class="col-lg-4 text-center text-lg-end mb-4">
+<h5 class="fw-bold mb-3"><ruby>社<rt>ㄕㄜˋ</rt></ruby><ruby>群<rt>ㄑㄩㄣˊ</rt></ruby><ruby>連<rt>ㄌㄧㄢˊ</rt></ruby><ruby>結<rt>ㄐㄧㄝˊ</rt></ruby></h5>
+<a href="https://facebook.com/sweetmagic" target="_blank" class="social-icon"><i class="fab fa-facebook-f"></i></a>
+<a href="#" class="social-icon"><i class="fab fa-instagram"></i></a>
+<a href="#" class="social-icon"><i class="fab fa-line"></i></a>
+</div>
+</div>
+<div class="text-center pt-3 border-top border-light opacity-75">
+<p class="mb-0 small">&copy; 2025 Sweet Magic House. All rights reserved.</p>
+</div>
+</div>
+
+<i class="decoration-star fas fa-star" style="bottom: 5rem; left: 10%; color: white; opacity: 0.5;"></i>
+<i class="decoration-star fas fa-star" style="top: 2rem; right: 20%; color: white; opacity: 0.5;"></i>
+</footer>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
